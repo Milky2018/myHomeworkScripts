@@ -1,22 +1,22 @@
 `include "mycpu.h"
 
 module ID_EX(
-	input             clk,
-	input             rst,
-	input             ID_stall,
-	input             EX_stall,
+	input         clk,
+	input         rst,
+	input         ID_stall,
+	input         EX_stall,
 
-	input      [31:0] ID_out_PC,
-	input      [31:0] ID_out_instruction,
-	input      [2 :0] ID_out_RFdst,
-	input      [3 :0] ID_out_RFsrc,
-	input      [3 :0] ID_out_ALUsrc,
-	input      [11:0] ID_out_ALUop,
-	input      [7 :0] ID_out_MDop,
-	input             ID_out_data_sram_en,
-	input      [3 :0] ID_out_data_sram_wen,
-	input      [31:0] ID_out_RF_rs_data,
-	input      [31:0] ID_out_RF_rt_data,
+	input  [31:0] ID_out_PC,
+	input  [31:0] ID_out_instruction,
+	input  [2 :0] ID_out_RFdst,
+	input  [3 :0] ID_out_RFsrc,
+	input  [3 :0] ID_out_ALUsrc,
+	input  [11:0] ID_out_ALUop,
+	input  [7 :0] ID_out_MDop,
+	input         ID_out_data_sram_en,
+	input  [3 :0] ID_out_data_sram_wen,
+	input  [31:0] ID_out_RF_rs_data,
+	input  [31:0] ID_out_RF_rt_data,
 
 	output [31:0] EX_in_PC,
 	output [31:0] EX_in_instruction,
@@ -43,17 +43,17 @@ module ID_EX(
 	reg [31:0] reg_RF_rs_data;
 	reg [31:0] reg_RF_rt_data;
 
-	assign EX_in_PC = reg_PC;
-	assign EX_in_instruction = reg_instruction;
-	assign EX_in_RFdst = reg_RFdst;
-	assign EX_in_RFsrc = reg_RFsrc;
-	assign EX_in_ALUsrc = reg_ALUsrc;
-	assign EX_in_ALUop = reg_ALUop;
-	assign EX_in_MDop = reg_MDop;
-	assign EX_in_data_sram_en = reg_data_sram_en;
+	assign EX_in_PC            = reg_PC;
+	assign EX_in_instruction   = reg_instruction;
+	assign EX_in_RFdst         = reg_RFdst;
+	assign EX_in_RFsrc         = reg_RFsrc;
+	assign EX_in_ALUsrc        = reg_ALUsrc;
+	assign EX_in_ALUop         = reg_ALUop;
+	assign EX_in_MDop          = reg_MDop;
+	assign EX_in_data_sram_en  = reg_data_sram_en;
 	assign EX_in_data_sram_wen = reg_data_sram_wen;
-	assign EX_in_RF_rs_data = reg_RF_rs_data;
-	assign EX_in_RF_rt_data = reg_RF_rt_data;
+	assign EX_in_RF_rs_data    = reg_RF_rs_data;
+	assign EX_in_RF_rt_data    = reg_RF_rt_data;
 
 	always @(posedge clk) begin
 		if (rst) begin

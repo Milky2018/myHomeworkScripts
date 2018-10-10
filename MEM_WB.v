@@ -1,17 +1,17 @@
 module MEM_WB(
- 	input             clk,
-    input             rst,
-    input             MEM_stall,
+ 	input         clk,
+    input         rst,
+    input         MEM_stall,
 
-    input      [31:0] MEM_out_RF_wdata,
-    input      [4 :0] MEM_out_RF_waddr,
-    input             MEM_out_RF_wen,
-    input      [31:0] MEM_out_PC,
+    input  [31:0] MEM_out_RF_wdata,
+    input  [4 :0] MEM_out_RF_waddr,
+    input         MEM_out_RF_wen,
+    input  [31:0] MEM_out_PC,
 
     output [31:0] WB_in_RF_wdata,
     output [4 :0] WB_in_RF_waddr,
     output        WB_in_RF_wen,
-    output[31:0] WB_in_PC
+    output [31:0] WB_in_PC
 );
     reg [31:0] reg_RF_wdata;
     reg [4 :0] reg_RF_waddr;

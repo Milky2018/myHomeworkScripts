@@ -46,19 +46,19 @@ module ID_Control(
 	wire inst_mflo  = (op == `INST_R_TYPE) && (func == `R_FUNC_MFLO) && (rs == 5'b00000) && (rt == 5'b00000) && (sa == 5'b00000);
 	wire inst_mthi  = (op == `INST_R_TYPE) && (func == `R_FUNC_MTHI) && (rt == 5'b00000) && (rd == 5'b00000) && (sa == 5'b00000);
 	wire inst_mtlo  = (op == `INST_R_TYPE) && (func == `R_FUNC_MTLO) && (rt == 5'b00000) && (rd == 5'b00000) && (sa == 5'b00000);
-	wire inst_jal   = op == `INST_JAL;
-	wire inst_beq   = op == `INST_BEQ;
-	wire inst_bne   = op == `INST_BNE;
-	wire inst_addiu = op == `INST_ADDIU;
-	wire inst_lui   = op == `INST_LUI && (rs == 5'b00000);
-	wire inst_lw    = op == `INST_LW;
-	wire inst_sw    = op == `INST_SW;
-	wire inst_addi  = op == `INST_ADDI;
-	wire inst_slti  = op == `INST_SLTI;
-	wire inst_sltiu = op == `INST_SLTIU;
-	wire inst_andi  = op == `INST_ANDI;
-	wire inst_ori   = op == `INST_ORI;
-	wire inst_xori  = op == `INST_XORI;
+	wire inst_jal   =  op == `INST_JAL;
+	wire inst_beq   =  op == `INST_BEQ;
+	wire inst_bne   =  op == `INST_BNE;
+	wire inst_addiu =  op == `INST_ADDIU;
+	wire inst_lui   =  op == `INST_LUI && (rs == 5'b00000);
+	wire inst_lw    =  op == `INST_LW;
+	wire inst_sw    =  op == `INST_SW;
+	wire inst_addi  =  op == `INST_ADDI;
+	wire inst_slti  =  op == `INST_SLTI;
+	wire inst_sltiu =  op == `INST_SLTIU;
+	wire inst_andi  =  op == `INST_ANDI;
+	wire inst_ori   =  op == `INST_ORI;
+	wire inst_xori  =  op == `INST_XORI;
 
 	// To ALUcontrol
 	wire ALU_nop = inst_jr   | inst_jal | inst_beq | inst_bne | inst_div | inst_divu | inst_mult | inst_multu |

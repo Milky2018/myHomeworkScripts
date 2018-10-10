@@ -15,25 +15,25 @@ module EX_MulDiv(
 	parameter state_divr = 5'b01000;
 	parameter state_mulr = 5'b10000;
 
-	reg [31:0] HI, LO;
-	reg [4:0] state;
-	reg start_div, end_reg;
-	wire end_div;
+	reg  [31:0] HI, LO;
+	reg  [4 :0] state;
+	reg         start_div, end_reg;
+	wire        end_div;
 	wire [63:0] mul_result, div_result, result;
 
-	wire div = MDop[7];
-	wire divu = MDop[6];
-	wire mult = MDop[5];
+	wire div   = MDop[7];
+	wire divu  = MDop[6];
+	wire mult  = MDop[5];
 	wire multu = MDop[4];
-	wire mfhi = MDop[3];
-	wire mflo = MDop[2];
-	wire mthi = MDop[1];
-	wire mtlo = MDop[0];
+	wire mfhi  = MDop[3];
+	wire mflo  = MDop[2];
+	wire mthi  = MDop[1];
+	wire mtlo  = MDop[0];
 
 	wire sign = div | mult;
 
-	assign MD_data = ({32{mfhi}} & HI) | ({32{mflo}} & LO);
-	assign result = ({64{div|divu}} & div_result) | ({64{mult|multu}} & mul_result);
+	assign MD_data     = ({32{mfhi}} & HI) | ({32{mflo}} & LO);
+	assign result      = ({64{div|divu}} & div_result) | ({64{mult|multu}} & mul_result);
 	assign EX_MD_stall = end_reg? 1'b0 : 
 		                 (state == state_wait && (div|divu) == 1'b1) | 
 		                 (state == state_div) |

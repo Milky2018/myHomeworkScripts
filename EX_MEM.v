@@ -1,19 +1,19 @@
 `include "mycpu.h"
 
 module EX_MEM(
-    input             clk,
-    input             rst,
-    input             EX_stall,
-    input             MEM_stall,
+    input         clk,
+    input         rst,
+    input         EX_stall,
+    input         MEM_stall,
 
-    input      [31:0] EX_out_ALUresult,
-    input      [31:0] EX_out_MD_data,
-    input      [31:0] EX_out_PC,
-    input      [31:0] EX_out_instruction,
-    input      [31:0] EX_out_data_sram_addr,
-    input      [31:0] EX_out_data_sram_wdata,
-    input      [2 :0] EX_out_RFdst,
-    input      [3 :0] EX_out_RFsrc,
+    input  [31:0] EX_out_ALUresult,
+    input  [31:0] EX_out_MD_data,
+    input  [31:0] EX_out_PC,
+    input  [31:0] EX_out_instruction,
+    input  [31:0] EX_out_data_sram_addr,
+    input  [31:0] EX_out_data_sram_wdata,
+    input  [2 :0] EX_out_RFdst,
+    input  [3 :0] EX_out_RFsrc,
 
     output [31:0] MEM_in_ALUresult,
     output [31:0] MEM_in_MD_data,
@@ -34,14 +34,14 @@ module EX_MEM(
     reg [2 :0] reg_RFdst;
     reg [3 :0] reg_RFsrc;
 
-    assign MEM_in_ALUresult = reg_ALUresult;
-    assign MEM_in_MD_data = reg_MD_data;
-    assign MEM_in_PC = reg_PC;
-    assign MEM_in_instruction = reg_instruction;
-    assign MEM_in_data_sram_addr = reg_data_sram_addr;
+    assign MEM_in_ALUresult       = reg_ALUresult;
+    assign MEM_in_MD_data         = reg_MD_data;
+    assign MEM_in_PC              = reg_PC;
+    assign MEM_in_instruction     = reg_instruction;
+    assign MEM_in_data_sram_addr  = reg_data_sram_addr;
     assign MEM_in_data_sram_wdata = reg_data_sram_wdata;
-    assign MEM_in_RFdst = reg_RFdst;
-    assign MEM_in_RFsrc = reg_RFsrc;
+    assign MEM_in_RFdst           = reg_RFdst;
+    assign MEM_in_RFsrc           = reg_RFsrc;
 
 	always @(posedge clk) begin
 		if (rst) begin
