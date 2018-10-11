@@ -294,9 +294,9 @@ EX_MWcontrol u_EX_MWcontrol(
     .data_addr(EX_out_data_sram_addr)
 );
 assign data_sram_wdata = EX_out_data_sram_wdata;
-assign data_sram_addr = EX_out_data_sram_addr;
-assign data_sram_en = EX_in_data_sram_en;
-assign data_sram_wen = EX_in_data_sram_wen;
+assign data_sram_addr  = EX_out_data_sram_addr;
+assign data_sram_en    = EX_in_data_sram_en;
+assign data_sram_wen   = EX_in_data_sram_wen;
 
 // EX_MEM
 EX_MEM u_EX_MEM(
