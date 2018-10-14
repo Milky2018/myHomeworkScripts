@@ -23,7 +23,7 @@ module MEM_RFcontrol(
 					  ({32{RFsrc[`RF_from_alu]}}     & alu_result) |
 					  ({32{RFsrc[`RF_from_PCplus8]}} &    PCplus8) |
 					  ({32{RFsrc[`RF_from_MD]}}      &    MD_data);
-	
+
 	assign RF_waddr = ({5{RFdst[`RF_in_rd]}} &    rd) |
 					  ({5{RFdst[`RF_in_rt]}} &    rt) |
 					  ({5{RFdst[`RF_in_ra]}} & 5'd31);

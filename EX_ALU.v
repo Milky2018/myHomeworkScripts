@@ -31,11 +31,11 @@ module EX_ALU(
 	wire [31:0] or_result  = A|B;
 	wire [31:0] xor_result = A^B;
 	wire [31:0] nor_result = ~or_result;
-	wire [31:0] sll_result = B << A;
+	wire [31:0] sll_result = B << A[4:0];
 	wire [31:0] slt_result = {31'b0, (A[31]&sub_result[31]) | (~B[31]&sub_result[31]) | (A[31]&~B[31]&~sub_result[31])};
 	wire [31:0] sltu_result= A < B;
-	wire [31:0] srl_result = B >> A;
-	wire [31:0] sra_result = signedB >>> A;
+	wire [31:0] srl_result = B >> A[4:0];
+	wire [31:0] sra_result = signedB >>> A[4:0];
 	wire [31:0] lui_result = {B[15:0], 16'b0};
 
 	assign result = ({32{op_add}} & add_result) |

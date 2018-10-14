@@ -14,6 +14,7 @@ module EX_MEM(
     input  [31:0] EX_out_data_sram_wdata,
     input  [2 :0] EX_out_RFdst,
     input  [3 :0] EX_out_RFsrc,
+	input  [6 :0] EX_out_RFdtl,
 
     output [31:0] MEM_in_ALUresult,
     output [31:0] MEM_in_MD_data,
@@ -22,7 +23,8 @@ module EX_MEM(
     output [31:0] MEM_in_data_sram_addr,
     output [31:0] MEM_in_data_sram_wdata,
     output [2 :0] MEM_in_RFdst,
-    output [3 :0] MEM_in_RFsrc
+    output [3 :0] MEM_in_RFsrc,
+	output [6 :0] MEM_in_RFdtl
 );
 	
 	reg [31:0] reg_ALUresult;
@@ -33,6 +35,7 @@ module EX_MEM(
     reg [31:0] reg_data_sram_wdata;
     reg [2 :0] reg_RFdst;
     reg [3 :0] reg_RFsrc;
+	reg [6 :0] reg_RFdtl;
 
     assign MEM_in_ALUresult       = reg_ALUresult;
     assign MEM_in_MD_data         = reg_MD_data;
@@ -42,6 +45,7 @@ module EX_MEM(
     assign MEM_in_data_sram_wdata = reg_data_sram_wdata;
     assign MEM_in_RFdst           = reg_RFdst;
     assign MEM_in_RFsrc           = reg_RFsrc;
+	assign MEM_in_RFdtl           = reg_RFdtl;
 
 	always @(posedge clk) begin
 		if (rst) begin
@@ -53,6 +57,7 @@ module EX_MEM(
 	        reg_data_sram_wdata <= 32'd0;
 	        reg_RFdst           <= 3'b000;
 	        reg_RFsrc           <= 4'b0000;
+			reg_RFdtl           <= 6'd0;
 		end else if (MEM_stall) begin
 			reg_ALUresult       <= reg_ALUresult;
 			reg_MD_data         <= reg_MD_data;
@@ -62,6 +67,7 @@ module EX_MEM(
 	        reg_data_sram_wdata <= reg_data_sram_wdata;
 	        reg_RFdst           <= reg_RFdst;
 	        reg_RFsrc           <= reg_RFsrc;
+			reg_RFdtl           <= reg_RFdtl;
 		end else if (EX_stall) begin
 			reg_ALUresult       <= 32'd0;
 			reg_MD_data         <= 32'd0;
@@ -71,6 +77,7 @@ module EX_MEM(
 	        reg_data_sram_wdata <= 32'd0;
 	        reg_RFdst           <= 3'b000;
 	        reg_RFsrc           <= 4'b0000;
+			reg_RFdtl           <= 6'd0;
 		end else begin
 	        reg_ALUresult       <= EX_out_ALUresult;
 	        reg_MD_data         <= EX_out_MD_data;
@@ -80,6 +87,7 @@ module EX_MEM(
 	        reg_data_sram_wdata <= EX_out_data_sram_wdata;
 	        reg_RFdst           <= EX_out_RFdst;
 	        reg_RFsrc           <= EX_out_RFsrc;
+			reg_RFdtl           <= EX_out_RFdtl;
 		end
 	end
 

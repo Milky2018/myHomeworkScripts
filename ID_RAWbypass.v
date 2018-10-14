@@ -6,7 +6,7 @@ module ID_RAWbypass(
 	input  [4 :0] MEM_RF_waddr,
 	input  [4 :0] WB_RF_waddr,
 
-	input  [3 :0] ID_RFsrc,
+	input  [3 :0] EX_RFsrc,
 
 	input  [2 :0] EX_RFdst,
 
@@ -14,6 +14,8 @@ module ID_RAWbypass(
 	input  [31:0] rt_data,
 
 	input  [31:0] EX_ALUresult,
+	input  [31:0] EX_MD_data,
+	input  [31:0] EX_PC,
 	input  [31:0] MEM_RF_wdata,
 	input  [31:0] WB_RF_wdata,
 
@@ -24,6 +26,11 @@ module ID_RAWbypass(
 
 	wire [4:0] EX_RF_waddr, EX_rt, EX_rd, EX_ra, ID_rs, ID_rt;
 	wire [31:0] EX_RF_wdata;
+
+	wire [31:0] EX_PCplus8 = EX_PC + 32'd8;
+	assign EX_RF_wdata = ({32{EX_RFsrc[`RF_from_alu]}}     & EX_ALUresult) |
+					     ({32{EX_RFsrc[`RF_from_PCplus8]}} &   EX_PCplus8) |
+					     ({32{EX_RFsrc[`RF_from_MD]}}      &   EX_MD_data);
 
 	assign EX_rt = EX_instruction[20:16];
 	assign EX_rd = EX_instruction[15:11];
@@ -36,7 +43,6 @@ module ID_RAWbypass(
 
 	assign ID_bypass_stall = (EX_instruction[31:29] == 3'b100) && 
 							 ((EX_RF_waddr == ID_rs) || (EX_RF_waddr == ID_rt));
-	assign EX_RF_wdata = EX_ALUresult;
 
 	assign ID_out_RF_rs_data = ID_rs == 5'd0        ? 32'd0        : 
 							   ID_rs == EX_RF_waddr ? EX_RF_wdata  :
