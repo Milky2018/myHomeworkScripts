@@ -39,6 +39,7 @@ wire [31:0] MEM_in_PC;
 wire [31:0] MEM_out_PC = MEM_in_PC;
 wire [31:0] WB_in_PC;
 
+wire [31:0] IF_out_instruction = inst_sram_rdata;
 wire [31:0] ID_in_instruction;
 wire [31:0] ID_out_instruction = ID_in_instruction;
 wire [31:0] EX_in_instruction;
@@ -134,7 +135,7 @@ IF u_IF(
     .IF_in_PC(IF_in_PC)
 );
 
-assign inst_sram_addr = IF_in_PC;
+assign inst_sram_addr = rst? 32'hbfc00000 : ID_out_nextPC;
 
 // IF_ID
 IF_ID u_IF_ID(
@@ -144,8 +145,10 @@ IF_ID u_IF_ID(
     .ID_stall(ID_stall),
 
     .IF_out_PC(IF_out_PC),
+    .IF_out_instruction(IF_out_instruction),
 
-    .ID_in_PC(ID_in_PC)
+    .ID_in_PC(ID_in_PC),
+    .ID_in_instruction(ID_in_instruction)
 );
 
 
@@ -165,15 +168,6 @@ ID_Control u_ID_Control(
 
     .data_en(ID_out_data_sram_en),
     .data_dtl(ID_out_data_dtl)
-);
-
-ID_IRbuffer u_ID_IRbuffer(
-    .clk(clk),
-    .rst(rst),
-    .ID_stall(ID_stall),
-    .inst_sram_rdata(inst_sram_rdata),
-    
-    .ID_instruction(ID_in_instruction)
 );
 
 wire [31:0] RF_rs_data, RF_rt_data;
