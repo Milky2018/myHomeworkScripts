@@ -306,7 +306,7 @@ EX_MWcontrol u_EX_MWcontrol(
 
     .data_en(EX_in_data_sram_en),
     .data_dtl(EX_in_data_dtl),
-    .ea(EX_in_instruction[1:0]),
+    .ea(EX_out_ALUresult[1:0]),
 
     .data_wdata(EX_out_data_sram_wdata),
     .data_addr(EX_out_data_sram_addr),
@@ -349,7 +349,7 @@ EX_MEM u_EX_MEM(
 MEM_MRcontrol u_MEM_MRcontrol(
     .data_rdata(MEM_in_mem_rdata),
     .RFdtl(MEM_in_RFdtl),
-	.ea(MEM_in_instruction[1:0]),
+	.ea(MEM_in_ALUresult[1:0]),
 
     .mem_data(MEM_out_mem_rdata),
     .RF_strb(MEM_out_RF_strb)
