@@ -4,15 +4,14 @@ module EX_MWcontrol(
 	input  [31:0] rt_data,
 	input  [31:0] alu_result,
 
-	input         data_en,
 	input  [4 :0] data_dtl,
-	input  [1 :0] ea,
 
 	output [31:0] data_wdata,
 	output [31:0] data_addr,
 	output [3 :0] data_strb
 );
 
+	wire [1:0] ea = alu_result[1:0];
 	assign data_addr = {alu_result[31:2], 2'b00};
 
 	wire [31:0] word_data = rt_data;

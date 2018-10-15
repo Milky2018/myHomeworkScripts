@@ -304,9 +304,7 @@ EX_MWcontrol u_EX_MWcontrol(
     .rt_data(EX_in_RF_rt_data),
     .alu_result(EX_out_ALUresult),
 
-    .data_en(EX_in_data_sram_en),
     .data_dtl(EX_in_data_dtl),
-    .ea(EX_out_ALUresult[1:0]),
 
     .data_wdata(EX_out_data_sram_wdata),
     .data_addr(EX_out_data_sram_addr),
