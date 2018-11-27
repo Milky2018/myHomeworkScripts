@@ -2,7 +2,8 @@ module EX_MulDiv(
 	input clk,
 	input rst,
 
-	input [7:0] MDop,
+	input        MEM_exception,
+	input [ 7:0] MDop,
 	input [31:0] rs_data,
 	input [31:0] rt_data,
 
@@ -21,14 +22,14 @@ module EX_MulDiv(
 	wire        end_div;
 	wire [63:0] mul_result, div_result, result;
 
-	wire div   = MDop[7];
-	wire divu  = MDop[6];
-	wire mult  = MDop[5];
-	wire multu = MDop[4];
-	wire mfhi  = MDop[3];
-	wire mflo  = MDop[2];
-	wire mthi  = MDop[1];
-	wire mtlo  = MDop[0];
+	wire div   = MDop[7] & ~MEM_exception;
+	wire divu  = MDop[6] & ~MEM_exception;
+	wire mult  = MDop[5] & ~MEM_exception;
+	wire multu = MDop[4] & ~MEM_exception;
+	wire mfhi  = MDop[3] & ~MEM_exception;
+	wire mflo  = MDop[2] & ~MEM_exception;
+	wire mthi  = MDop[1] & ~MEM_exception;
+	wire mtlo  = MDop[0] & ~MEM_exception;
 
 	wire sign = div | mult;
 
@@ -42,8 +43,8 @@ module EX_MulDiv(
 
 	always @(posedge clk) begin
 		if (rst) begin
-			HI <= 32'd0;
-			LO <= 32'd0;
+			// HI <= 32'd0;
+			// LO <= 32'd0;
 			state <= state_wait;
 			start_div <= 1'b0;
 			end_reg <= 1'b0;

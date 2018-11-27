@@ -8,11 +8,18 @@ module EX_MWcontrol(
 
 	output [31:0] data_wdata,
 	output [31:0] data_addr,
-	output [3 :0] data_strb
+	output [3 :0] data_strb,
+
+	input         in_en,
+	output        out_en,
+
+	output        AdES_exception,
+
+	input         MEM_exception
 );
 
 	wire [1:0] ea = alu_result[1:0];
-	assign data_addr = {alu_result[31:2], 2'b00};
+	assign data_addr = alu_result;
 
 	wire [31:0] word_data = rt_data;
 	wire [31:0] swl_data = ({32{ea == 2'b00}} & {24'd0, word_data[31:24]}) |
@@ -51,5 +58,10 @@ module EX_MWcontrol(
 					    ({32{data_dtl[`MEM_dtl_swr ]}} &  swr_data) |
 					    ({32{data_dtl[`MEM_dtl_sb  ]}} &   sb_data) |
 					    ({32{data_dtl[`MEM_dtl_sh  ]}} &   sh_data);
+
+	assign AdES_exception = (data_dtl[`MEM_dtl_word] & (ea != 2'b00)) |
+						    (data_dtl[`MEM_dtl_sh] & (ea[0] == 1'b1));
+
+	assign out_en = in_en & ~MEM_exception & ~AdES_exception;
 
 endmodule

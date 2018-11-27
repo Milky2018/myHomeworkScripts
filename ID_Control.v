@@ -6,14 +6,22 @@ module ID_Control(
 	input  [31:0] instruction,
 
 	output [3 :0] ALUsrc,
-	output [11:0] ALUop,
+	output [13:0] ALUop,
 	output [7 :0] MDop,
 
-	output [8 :0] PCsrc,
+	output [10 :0] PCsrc,
 
 	output [2 :0] RFdst,
-	output [3 :0] RFsrc,
-	output [6: 0] RFdtl,
+	output [4 :0] RFsrc,
+	output [6 :0] RFdtl,
+
+	output        cp0wen,
+
+	output        syscall_exception,
+	output        break_exception,
+	output        reserved_exception,
+
+	output        eret,
 
 	output        data_en,
 	output [4 :0] data_dtl
@@ -24,6 +32,8 @@ module ID_Control(
 	wire [4:0] rd   = instruction[15:11];
 	wire [4:0] sa   = instruction[10:6];
 	wire [5:0] func = instruction[5:0];
+	wire [2:0] sel  = instruction[2:0];
+	wire [7:0] undf = instruction[10:3];
 
 	wire inst_sll    = (op == `INST_R_TYPE) && (func == `R_FUNC_SLL)  && (rs == 5'b00000);
 	wire inst_srl    = (op == `INST_R_TYPE) && (func == `R_FUNC_SRL)  && (rs == 5'b00000);
@@ -51,6 +61,8 @@ module ID_Control(
 	wire inst_mflo   = (op == `INST_R_TYPE) && (func == `R_FUNC_MFLO) && (rs == 5'b00000) && (rt == 5'b00000) && (sa == 5'b00000);
 	wire inst_mthi   = (op == `INST_R_TYPE) && (func == `R_FUNC_MTHI) && (rt == 5'b00000) && (rd == 5'b00000) && (sa == 5'b00000);
 	wire inst_mtlo   = (op == `INST_R_TYPE) && (func == `R_FUNC_MTLO) && (rt == 5'b00000) && (rd == 5'b00000) && (sa == 5'b00000);
+	wire inst_syscall= (op == `INST_R_TYPE) && (func == `SYSCALL);
+	wire inst_break  = (op == `INST_R_TYPE) && (func == `BREAK);
 	wire inst_j      =  op == `INST_J;
 	wire inst_jal    =  op == `INST_JAL;
 	wire inst_addiu  =  op == `INST_ADDIU;
@@ -81,11 +93,15 @@ module ID_Control(
 	wire inst_bgez   = (op == `INST_REGIMM) && (rt == `REGIMM_BGEZ);
 	wire inst_bltzal = (op == `INST_REGIMM) && (rt == `REGIMM_BLTZAL);
 	wire inst_bgezal = (op == `INST_REGIMM) && (rt == `REGIMM_BGEZAL);
+	wire inst_mfc0   = (op == `INST_COP0) && (rs == `COP0_MF) && (undf == 8'b00000000);
+	wire inst_mtc0   = (op == `INST_COP0) && (rs == `COP0_MT) && (undf == 8'b00000000);
+	wire inst_eret   = (op == `INST_COP0) && (instruction[25:6] == 20'h80000) && (func == 6'b011000);
 
 	// To ALUcontrol
 	wire ALU_nop = inst_jr   | inst_jal | inst_beq    | inst_bne    | inst_div | inst_divu | inst_mult | inst_multu |
 				   inst_mfhi | inst_mflo| inst_mthi   | inst_mtlo   | inst_j   | inst_jalr | inst_blez | inst_bgtz  |
-				   inst_bltz | inst_bgez| inst_bltzal | inst_bgezal;
+				   inst_bltz | inst_bgez| inst_bltzal | inst_bgezal | inst_mfc0| inst_mtc0 | inst_syscall           | 
+				   inst_break| inst_eret;
 
 	assign ALUsrc[`ALU_from_rs_rt]        = inst_sltu | inst_addu |
 							     			inst_subu | inst_and  |
@@ -107,10 +123,8 @@ module ID_Control(
 											inst_swl  | inst_swr  |
 											inst_sb   | inst_sh;        
 
-	assign ALUop[`ALUOP_ADD ] = inst_addiu| inst_addu | inst_lw | inst_sw  | inst_add | inst_addi |
-								inst_lwl  | inst_lwr  | inst_lb | inst_lbu | inst_lh  | inst_lhu  |
-								inst_swl  | inst_swr  | inst_sb | inst_sh;
-	assign ALUop[`ALUOP_SUB ] = inst_subu | inst_sub;
+	assign ALUop[`ALUOP_ADD ] = inst_add | inst_addi;
+	assign ALUop[`ALUOP_SUB ] = inst_sub;
 	assign ALUop[`ALUOP_AND ] = inst_and  | inst_andi;
 	assign ALUop[`ALUOP_OR  ] = inst_or   | inst_ori;
 	assign ALUop[`ALUOP_XOR ] = inst_xor  | inst_xori;
@@ -121,34 +135,42 @@ module ID_Control(
 	assign ALUop[`ALUOP_SRL ] = inst_srl  | inst_srlv;
 	assign ALUop[`ALUOP_SRA ] = inst_sra  | inst_srav;
 	assign ALUop[`ALUOP_LUI ] = inst_lui;
+	assign ALUop[`ALUOP_ADDU] = inst_addiu| inst_addu | inst_lw | inst_sw  | 
+								inst_lwl  | inst_lwr  | inst_lb | inst_lbu | inst_lh  | inst_lhu  |
+								inst_swl  | inst_swr  | inst_sb | inst_sh;
+	assign ALUop[`ALUOP_SUBU] = inst_subu;
 
 	// To MulDiv
 	assign MDop = {inst_div, inst_divu, inst_mult, inst_multu, inst_mfhi, inst_mflo, inst_mthi, inst_mtlo};
 
 	// To PCcontrol
-	assign PCsrc[`PC_from_PCplus] = ~(PCsrc[`PC_from_target] | PCsrc[`PC_from_reg]  | PCsrc[`PC_from_beq] |
-									  PCsrc[`PC_from_bne]    | PCsrc[`PC_from_bltz] | PCsrc[`PC_from_bgez]|
-									  PCsrc[`PC_from_blez]   | PCsrc[`PC_from_bgtz]);
-	assign PCsrc[`PC_from_target] = inst_jal | inst_j;
-	assign PCsrc[`PC_from_reg]    = inst_jr  | inst_jalr;
-	assign PCsrc[`PC_from_beq]    = inst_beq;
-	assign PCsrc[`PC_from_bne]    = inst_bne;
-	assign PCsrc[`PC_from_bltz]   = inst_bltz | inst_bltzal;
-	assign PCsrc[`PC_from_bgez]   = inst_bgez | inst_bgezal;
-	assign PCsrc[`PC_from_blez]   = inst_blez;
-	assign PCsrc[`PC_from_bgtz]   = inst_bgtz;
+	assign PCsrc[`PC_from_PCplus]    = ~(PCsrc[`PC_from_target] | PCsrc[`PC_from_reg]  | PCsrc[`PC_from_beq]       |
+								  	     PCsrc[`PC_from_bne]    | PCsrc[`PC_from_bltz] | PCsrc[`PC_from_bgez]      |
+									     PCsrc[`PC_from_blez]   | PCsrc[`PC_from_bgtz]| PCsrc[`PC_from_exception] |
+										 PCsrc[`PC_from_EPC]);
+	assign PCsrc[`PC_from_target]    = inst_jal | inst_j;
+	assign PCsrc[`PC_from_reg]       = inst_jr  | inst_jalr;
+	assign PCsrc[`PC_from_beq]       = inst_beq;
+	assign PCsrc[`PC_from_bne]       = inst_bne;
+	assign PCsrc[`PC_from_bltz]      = inst_bltz | inst_bltzal;
+	assign PCsrc[`PC_from_bgez]      = inst_bgez | inst_bgezal;
+	assign PCsrc[`PC_from_blez]      = inst_blez;
+	assign PCsrc[`PC_from_bgtz]      = inst_bgtz;
+	// assign PCsrc[`PC_from_exception] = inst_syscall;
+	assign PCsrc[`PC_from_exception] = 1'b0;
+	assign PCsrc[`PC_from_EPC]       = inst_eret;
 
 	// To RFcontrol
 	wire RF_nop = inst_sw | inst_jr   | inst_div  | inst_divu | inst_mult | inst_multu | inst_mthi | inst_mtlo |
 				  inst_j  | inst_bltz | inst_bgez | inst_blez | inst_bgez | inst_swl   | inst_swr  | inst_sb   |
-				  inst_sh;
+				  inst_sh | inst_mtc0 | inst_eret | inst_syscall          | inst_break;
 
 	assign RFdst[`RF_in_rd] = inst_sll | inst_srl  | inst_sra  | inst_addu | inst_subu | inst_and | inst_or  |
 						      inst_xor | inst_nor  | inst_slt  | inst_sltu | inst_add  | inst_sub | inst_sllv|
 						      inst_srav| inst_srlv | inst_mfhi | inst_mflo | inst_jalr;
 	assign RFdst[`RF_in_rt] = inst_lw  | inst_lui  | inst_addiu| inst_addi | inst_slti |inst_sltiu| inst_andi|
 						      inst_ori | inst_xori | inst_lwl  | inst_lwr  | inst_lb   | inst_lbu | inst_lh  |
-							  inst_lhu;
+							  inst_lhu | inst_mfc0;
 	assign RFdst[`RF_in_ra] = inst_jal |inst_bltzal|inst_bgezal;
 
 	assign RFsrc[`RF_from_mem]     = inst_lw  | inst_lwl | inst_lwr   | inst_lb    | inst_lbu  | inst_lh  | inst_lhu;
@@ -158,6 +180,7 @@ module ID_Control(
 						             inst_sllv| inst_srav| inst_srlv;
 	assign RFsrc[`RF_from_PCplus8] = inst_jal | inst_jalr| inst_bltzal| inst_bgezal;
 	assign RFsrc[`RF_from_MD]      = inst_mfhi| inst_mflo;
+	assign RFsrc[`RF_from_CP0]     = inst_mfc0;
 
 	assign RFdtl[`RF_dtl_lwl]  = inst_lwl;
 	assign RFdtl[`RF_dtl_lwr]  = inst_lwr;
@@ -169,7 +192,15 @@ module ID_Control(
 						         inst_xor    | inst_nor  | inst_slt   | inst_sltu  | inst_addiu| inst_lui | inst_add    |
 						         inst_addi   | inst_sub  | inst_slti  | inst_sltiu | inst_andi | inst_ori | inst_xori   |
 						         inst_sllv   | inst_srav | inst_srlv  | inst_lw    | inst_jal  | inst_jalr| inst_bltzal |
-								 inst_bgezal | inst_mfhi | inst_mflo;
+								 inst_bgezal | inst_mfhi | inst_mflo  | inst_mfc0;
+
+	// To cp0
+	assign cp0wen = inst_mtc0;
+
+	assign syscall_exception = inst_syscall;
+	assign break_exception = inst_break;
+	assign reserved_exception = ~(ALU_nop | (|ALUsrc));
+	assign eret = inst_eret;
 
 	// To MWcontrol
 	assign data_en = inst_sw | inst_lw | inst_lwl | inst_lwr | inst_lb | inst_lbu |

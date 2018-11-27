@@ -5,8 +5,10 @@
 module EX_ALU(
 	input  [31:0] A,
 	input  [31:0] B,
-	input  [11:0] OHC_ALUop,
-	output [31:0] result
+	input  [13:0] OHC_ALUop,
+	output [31:0] result,
+
+	output        overflow_exception
 );
 
 	wire op_add  = OHC_ALUop[`ALUOP_ADD];
@@ -21,12 +23,14 @@ module EX_ALU(
 	wire op_srl  = OHC_ALUop[`ALUOP_SRL];
 	wire op_sra  = OHC_ALUop[`ALUOP_SRA];
 	wire op_lui  = OHC_ALUop[`ALUOP_LUI];
+	wire op_addu = OHC_ALUop[`ALUOP_ADDU];
+	wire op_subu = OHC_ALUop[`ALUOP_SUBU];
 
 	wire signed [31:0] signedB;
 	assign signedB = B;
 
 	wire [31:0] add_result = A + B;
-	wire [31:0] sub_result = A + ~B + 32'b1;
+	wire [31:0] sub_result = A + ~B + 32'd1;
 	wire [31:0] and_result = A&B;
 	wire [31:0] or_result  = A|B;
 	wire [31:0] xor_result = A^B;
@@ -37,6 +41,8 @@ module EX_ALU(
 	wire [31:0] srl_result = B >> A[4:0];
 	wire [31:0] sra_result = signedB >>> A[4:0];
 	wire [31:0] lui_result = {B[15:0], 16'b0};
+	wire [31:0] addu_result= A + B;
+	wire [31:0] subu_result= A + ~B + 32'd1;
 
 	assign result = ({32{op_add}} & add_result) |
 	                ({32{op_sub}} & sub_result) | 
@@ -49,6 +55,11 @@ module EX_ALU(
 					({32{op_sltu}}& sltu_result)| 
 					({32{op_srl}} & srl_result) | 
 					({32{op_sra}} & sra_result) | 
-					({32{op_lui}} & lui_result);
+					({32{op_lui}} & lui_result) |
+					({32{op_addu}}& addu_result)|
+					({32{op_subu}}& subu_result);
+
+	assign overflow_exception = (op_add & ((A[31] & B[31] & ~add_result[31]) | (~A[31] & ~B[31] & add_result[31]))) |
+								(op_sub & ((A[31] & ~B[31] & ~sub_result[31]) | (~A[31] & B[31] & sub_result[31])));
 
 endmodule
